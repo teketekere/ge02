@@ -1,0 +1,69 @@
+name: Unittest
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  unittest:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        include:
+          - c_compiler: clang
+            cxx_compiler: clang++
+            compiler_version: 13
+            build_type: Release
+            debug_features: ON
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        id: cache-ccache
+        name: Cache ccache
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-ut-ccache-${{ matrix.c_compiler }}
+
+      - name: Install libc++
+        if: ${{ matrix.c_compiler == 'clang' }}
+        run: |
+          sudo apt-get install -y \
+            libc++-${{ matrix.compiler_version }}-dev \
+            libc++abi-${{ matrix.compiler_version }}-dev
+
+      - name: Set up Conan
+        run: |
+          pip3 install conan
+          conan install \
+            -pr conan/linux_${{ matrix.c_compiler }}_${{ matrix.compiler_version }}_${{ matrix.build_type }} \
+            -pr:b conan/linux_${{ matrix.c_compiler }}_${{ matrix.compiler_version }}_${{ matrix.build_type }} \
+            --build missing \
+            --output-folder=build \
+            .
+
+      - name: Set up CMake
+        run: |
+          export CC=/usr/bin/${{ matrix.c_compiler }}-${{ matrix.compiler_version }}
+          export CXX=/usr/bin/${{ matrix.cxx_compiler }}-${{ matrix.compiler_version }}
+          cmake -S. -Bbuild \
+            -D GE_ENABLE_SAN=${{ matrix.debug_features }} \
+            -D CMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
+            -D CMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            .
+
+      - name: Build
+        run: |
+          export CCACHE_COMPILERCHECK=content
+          cmake --build ./build -j4
+
+      - name: Run unittests
+        run: |
+          cd build
+          GTEST_COLOR=1 ctest -V
