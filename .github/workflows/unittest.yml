@@ -1,0 +1,59 @@
+name: Unittest
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  unittest:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        include:
+          - c_compiler: clang-13
+            cxx_compiler: clang++-13
+            build_type: Release
+            debug_features: ON
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        id: cache-ccache
+        name: Cache ccache
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-ut-ccache-${{ matrix.c_compiler }}
+
+      - name: Set up Conan
+        run: |
+          pip3 install conan
+          conan install \
+            -pr conan/linux_${{ matrix.c_compiler }}_${{ matrix.build_type }} \
+            -pr:b conan/linux_${{ matrix.c_compiler }}_${{ matrix.build_type }} \
+            --build missing \
+            --output-folder=build \
+            .
+
+      - name: Set up CMake
+        run: |
+          cmake -S. -Bbuild \
+            -G Ninja \
+            -D GE_ENABLE_SAN=${{ matrix.debug_features }} \
+            -D CMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
+            .
+
+      - name: Build
+        run: |
+          export CCACHE_COMPILERCHECK=content
+          cmake --build ./build -j4
+
+      - name: Run unittests
+        run: |
+          cd build
+          GTEST_COLOR=1 ctest -V
