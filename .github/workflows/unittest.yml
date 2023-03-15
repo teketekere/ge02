@@ -51,7 +51,6 @@ jobs:
       - name: Set up CMake
         run: |
           cmake -S. -Bbuild \
-            -G Ninja \
             -D GE_ENABLE_SAN=${{ matrix.debug_features }} \
             -D CMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
             -D CMAKE_BUILD_TYPE=${{ matrix.build_type }} \
