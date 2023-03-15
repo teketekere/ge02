@@ -1,0 +1,6 @@
+[
+  {
+    "name": "Conan",
+    "toolchainFile": "${workspaceFolder}/build/conan_toolchain.cmake"
+  }
+]

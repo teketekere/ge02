@@ -1,0 +1,38 @@
+{
+    "name": "${localWorkspaceFolderBasename}-deps",
+    "dockerFile": "Dockerfile",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+                "C_Cpp.intelliSenseEngine": "disabled",
+                "editor.formatOnSave": true,
+                "clangd.arguments": [
+                    "--clang-tidy",
+                    "--compile-commands-dir=${containerWorkspaceFolder}/build",
+                    "--header-insertion=iwyu"
+                ],
+                "clangd.onConfigChanged": "restart",
+                "doxdocgen.generic.paramTemplate": "@param[in] {param} "
+            },
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "kevinkyang.auto-comment-blocks",
+                "twxs.cmake",
+                "cschlosser.doxdocgen",
+                "esbenp.prettier-vscode",
+                "vadimcn.vscode-lldb",
+                "ms-python.python"
+            ]
+        }
+    },
+    "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+}
