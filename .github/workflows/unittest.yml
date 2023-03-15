@@ -36,7 +36,7 @@ jobs:
         run: |
           sudo apt-get install -y \
             libc++-${{ matrix.compiler_version }}-dev \
-            libc++abi-${{ matrix.compiler_version }}-dev  && \
+            libc++abi-${{ matrix.compiler_version }}-dev
 
       - name: Set up Conan
         run: |
@@ -54,6 +54,7 @@ jobs:
             -G Ninja \
             -D GE_ENABLE_SAN=${{ matrix.debug_features }} \
             -D CMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
+            -D CMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             .
 
       - name: Build
