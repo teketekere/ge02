@@ -15,8 +15,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - c_compiler: clang-13
-            cxx_compiler: clang++-13
+          - c_compiler: clang
+            cxx_compiler: clang++
+            compiler_version: 13
             build_type: Release
             debug_features: ON
     steps:
@@ -30,12 +31,19 @@ jobs:
           path: ~/.ccache
           key: ${{ runner.os }}-ut-ccache-${{ matrix.c_compiler }}
 
+      - name: Install libc++
+        if: ${{ matrix.c_compiler == 'clang' }}
+        run: |
+          sudo apt-get install -y \
+            libc++-${{ matrix.compiler_version }}-dev \
+            libc++abi-${{ matrix.compiler_version }}-dev  && \
+
       - name: Set up Conan
         run: |
           pip3 install conan
           conan install \
-            -pr conan/linux_${{ matrix.c_compiler }}_${{ matrix.build_type }} \
-            -pr:b conan/linux_${{ matrix.c_compiler }}_${{ matrix.build_type }} \
+            -pr conan/linux_${{ matrix.c_compiler }}_${{ matrix.compiler_version }}_${{ matrix.build_type }} \
+            -pr:b conan/linux_${{ matrix.c_compiler }}_${{ matrix.compiler_version }}_${{ matrix.build_type }} \
             --build missing \
             --output-folder=build \
             .
