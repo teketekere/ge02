@@ -50,6 +50,8 @@ jobs:
 
       - name: Set up CMake
         run: |
+          export CC=/usr/bin/${{ matrix.c_compiler }}-${{ matrix.compiler_version }}
+          export CXX=/usr/bin/${{ matrix.cxx_compiler }}-${{ matrix.compiler_version }}
           cmake -S. -Bbuild \
             -D GE_ENABLE_SAN=${{ matrix.debug_features }} \
             -D CMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
