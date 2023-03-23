@@ -20,4 +20,10 @@
 
   cmake -S. -Bbuild -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake .
   cmake --build build -j 12
+
+  # Debug build
+  conan install -pr conan/linux_clang_13_Debug  -pr:b conan/linux_clang_13_Debug  --build missing --output-folder=build .
+
+  # Debug with sanitizer
+  conan install -pr conan/linux_clang_13_Debug  -pr:b conan/linux_clang_13_Debug -o sanitizer=True --build missing --output-folder=build .
   ```
