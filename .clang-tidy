@@ -3,6 +3,7 @@ Checks: "-*,\
   bugprone-*,\
   -bugprone-macro-parentheses,\
   -bugprone-exception-escape,\
+  -bugprone-easily-swappable-parameters,\
   cert-*,\
   -cert-err58-cpp,\
   cppcoreguidelines-*,\

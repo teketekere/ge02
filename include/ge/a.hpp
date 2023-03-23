@@ -1,3 +1,0 @@
-namespace ge {
-    int f();
-}
